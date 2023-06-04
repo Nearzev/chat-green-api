@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import NotificationReceiver from './NotificationReceiver';
 
-const Chat = () => {
+const Chat = ({ idInstance, apiTokenInstance }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
@@ -27,29 +29,48 @@ const Chat = () => {
 
   const handleAddChat = (phoneNumber) => {
     const phoneNumberRegex = /^\d+$/;
-  
+
     if (phoneNumberRegex.test(phoneNumber)) {
       // Valid phone number
-      const chatExists = chats.some(chat => chat.phoneNumber === phoneNumber);
-      
-      if (!chatExists) {
-        const newChat = {
-          phoneNumber: phoneNumber,
-          messages: [],
-        };
-    
-        setChats((prevChats) => [...prevChats, newChat]);
-        setNewChatPhoneNumber('');
-      } else {
-        console.log('Chat with this phone number already exists');
-      }
+      const newChat = {
+        phoneNumber: phoneNumber,
+        messages: [],
+      };
+
+      setChats((prevChats) => [...prevChats, newChat]);
+      setNewChatPhoneNumber('');
     } else {
       console.log('Invalid phone number');
     }
   };
-  
+
+  const handleNotificationReceived = (notification) => {
+    if (notification !== null) {
+      console.log('Received notification:', notification);
+      deleteNotification(notification.receiptId);
+    }
+  };
+
+  const deleteNotification = async (receiptId) => {
+    try {
+      const url = `https://api.green-api.com/waInstance${idInstance}/deleteNotification/${apiTokenInstance}/${receiptId}`;
+      await axios.delete(url);
+    } catch (error) {
+      console.log('Error deleting notification:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Initialize chats, selectedChat, etc.
+  }, []);
+
   return (
     <div className="chat-container">
+      <NotificationReceiver
+        idInstance={idInstance}
+        apiTokenInstance={apiTokenInstance}
+        onNotificationReceived={handleNotificationReceived}
+      />
       <div className="chat-list">
         {chats.map((chat, index) => (
           <div

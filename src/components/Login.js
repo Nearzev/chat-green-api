@@ -21,16 +21,16 @@ const Login = ({ onAuthorized }) => {
   const handleLogin = async () => {
     setError('');
     setIsLoading(true);
-
+  
     try {
       const response = await axios.get(
         `https://api.green-api.com/waInstance${idInstance}/getStateInstance/${apiTokenInstance}`
       );
-
+  
       if (response.status === 200) {
-        onAuthorized();
-
-        // Сохранение значений в кеше браузера при успешной авторизации
+        onAuthorized(idInstance, apiTokenInstance);
+  
+        // Save values in browser cache upon successful authorization
         localStorage.setItem('idInstance', idInstance);
         localStorage.setItem('apiTokenInstance', apiTokenInstance);
       } else {
@@ -39,10 +39,9 @@ const Login = ({ onAuthorized }) => {
     } catch (error) {
       setError('Ошибка при выполнении запроса');
     }
-
+  
     setIsLoading(false);
   };
-
   return (
     <div className="authorization-container">
       <h2 className="authorization-title">Авторизация</h2>
